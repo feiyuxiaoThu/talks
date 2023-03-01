@@ -5,6 +5,7 @@ hideInToc: true
 class: text-white
 coverAuthor: 肖飞宇
 coverBackgroundUrl: /science.jpg
+download: true
 fonts:
   local: Montserrat, Roboto Mono, Roboto Slab # local fonts are used for legal reasons for deployment to https://slidev-theme-academic.alexeble.de and only set up for the example project, remove this line for your project to automatically have fonts imported from Google
 themeConfig:
@@ -360,13 +361,13 @@ Note: that's the reason why we need good hierarchy, namely, if we have better de
 layout: two-cols
 ---
 
-# Left
+# Convex
 Convex cases can reach global minimum.
 <img src="/convex.png" width = "350">
 
 ::right::
 
-# Right
+# Non Convex
 
 Nonconvex cases only fall into local minimum.
 <img src="/nonconvex.png" width = "350">
@@ -496,6 +497,169 @@ hideInToc: true
 
 # 量产 L2+ 中的决策规划算法实践
 ## 以高速领航辅助驾驶(NOP)为例
+
+
+
+
+---
+layout: figure-side
+figureCaption: 决策模块相当于无人驾驶系统的大脑，保障无人车的行车安全，同时也要理解和遵守交通规则。 为了实现这样的功能，决策模块为下游的规划模块提供了各种的限制信息
+figureFootnoteNumber: 
+figureUrl: minimum_lane_change_distance.png
+hideInToc: true
+---
+# 高速 NOP 中的决策
+
+**决策模块的输出**
+
+ + 路径的长度以及左右边界限制
+ + 路径上的速度限制
+ + 时间上的位置限制（Recall:轨迹和路径的区别）
+
+**高速 NOP 中需要决策的场景**
+
++ 抢行还是让行
++ 是否要主动变道
++ 在什么位置进行变道、并入那两辆车之间
++ 如何绕行前方障碍物/是否借道
++ 何时从匝道汇入主路
++ more ...
+
+
+---
+layout: figure-side
+figureCaption: 决定是否应该保持当前车道、借道或者变道
+figureFootnoteNumber: 1
+figureUrl: decision_lanechange.png
+hideInToc: true
+---
+
+
+## 决策：车道决策
+
+**常用算法**
+
++ 基于规则的有限状态机
+  + 状态之间的转移通常用规则进行判断
+  + 适用于低级别自动驾驶与简单高速场景
++ 基于轨迹评价的方法
+  + 核心思想： 基于（粗）规划的结果进行决策
+  + 保证决策可以为规划提供一个合适的解空间
+  + 常用评价指标：
+    + 轨迹越光滑越好
+    + 距离周围车辆越远越好
+    + 距离目标越近越好
+  + 适用于高级别自动驾驶和复杂城区道路
+  + 评价函数可以通过数据驱动的方式持续改进
+
+---
+layout: figure-side
+figureCaption: 给定车道决策下，定性地决定如何处理一个障碍物
+figureFootnoteNumber: 1
+figureUrl: obs_decision.png
+hideInToc: true
+---
+
+
+## 决策：车道决策
+
+**常用算法**
+
++ 基于规则（适用于单一障碍物的简单场景）
++ 基于搜索的方法如 A*，DP 等（适用于多障碍物复杂场景）
+
+**难点与挑战**
++ 如何与障碍物进行复杂的交互与决策
+
+车道决策与障碍物决策共同为下游的轨迹规划提供可行空间。
+
+
+
+---
+layout: figure-side
+figureCaption: 给定导航路线、车道决策和障碍物决策，定量地规划一条从车辆当前位置指向目的地的轨迹
+figureFootnoteNumber: 
+figureUrl: avoid_fig_multi_case.png
+hideInToc: true
+---
+# 高速 NOP 中的规划
+
++ 轨迹定义： 车辆状态的时间序列
+
+$$ t \to (x,y,\psi,\kappa,v,a) $$
+
++ 轨迹需要满足的性质：
+  + 安全：不能与障碍物、路沿、护栏等发生碰撞
+  + 舒适：加减速平滑
+  + 遵守交规：红绿灯、道路限速
+  + 效率：尽可能快的到达目的地
+
++ PipeLine
+
+<html>
+<body>
+<table><tr>
+<td><img src="/pipeline_op.png" width="300"  border=0 /></td>
+</tr></table> 
+</body>
+</html>
+
+
+---
+layout: two-cols
+---
+
+# 规划：Frenet 坐标
+
+
+<img src="/frenet.png" width = "400">
+
+生成构型空间中满足目标和约束的连续可微曲线
+
+$$[x,y,\theta,\kappa,v,a] \Leftrightarrow [s,\dot{s},\ddot{s},d,d^{'},d^{''}] $$
+
++ dynamic reference frame.
++ lateral and longitudinal independently.
+
+
+::right::
+
+# 轨迹生成
+
+<img src="/lat_traj.png" width = "400">
+
+
+$$
+d(t) = a_{d0} + a_{d1}t + a_{d2} t^2 + a_{d3} t^3 + a_{d4} t^4 + a_{d5} t^5 
+$$
+
+$$
+s(t) = a_{s0} + a_{s1}t + a_{s2} t^2 + a_{s3} t^3 + a_{s4} t^4 + a_{s5} t^5
+$$
+
++ 采样
++ 碰撞检测
++ 轨迹评估
+
+
+---
+layout: default
+---
+# Minimum jerk trajectory generation
+
+**Why trajectory generation/optimization**
+
++ Good for autonomous moving.
++ Velocity/higher order dynamics can’t change immediately.
++ The robot should not stop at turns.
++ Save energy.
+
+
+<img src="/traj_opt.png" width = "500">
+
+
+
+
 
 
 ---
