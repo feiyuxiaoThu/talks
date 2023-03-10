@@ -4,7 +4,7 @@ layout: cover
 hideInToc: true
 class: text-white
 coverAuthor: 肖飞宇
-coverBackgroundUrl: /science.jpg
+coverBackgroundUrl: /nop.png
 download: true
 fonts:
   local: Montserrat, Roboto Mono, Roboto Slab # local fonts are used for legal reasons for deployment to https://slidev-theme-academic.alexeble.de and only set up for the example project, remove this line for your project to automatically have fonts imported from Google
@@ -321,11 +321,14 @@ hideInToc: yes
 
 **Main Formulations**:
 
-+ Variational Methods
++ **Path planning**
+  + Deterministic: Dijkstra, A*, D*, D* lite/LPA*, and etc.
+  + Randomized: PRM,RRT,RRT*,FMT,BIT*,and etc.
 
-+ Graph Search Methods
+<img src="/sikang1.png" width = "700">
 
-+ Incremental Search Techniques
+
+
 
 
 ---
@@ -333,59 +336,49 @@ layout: default
 hideInToc: yes
 ---
 
-## Variational Methods
+## Deterministic vs Randomized
 
-Variational methods minimize a functional:
+<img src="/sikang2.png" width = "800">
+
+
+---
+layout: figure-side
+figureCaption: 
+figureFootnoteNumber: 1
+figureUrl: sikang4.png
+---
+
+## Optimization-based Trajectory Planning
+
++ **Piece-wise Polynomial**
 
 $$
-\begin{aligned}
-\underset{\pi}{\operatorname{argmin}} & J(\pi)=\int_{0}^{T} f(\pi) d t \\
-\text { s.t. } & \pi(0)=\mathbf{x}_{\text {init }} \wedge \pi(T) \in \mathbf{X}_{\text {goal }}
-\end{aligned}
+f(t)=\left\{\begin{array}{cc}
+f_{1}(t) \doteq \sum_{i=0}^{N} p_{1, i} t^{i} & T_{0} \leq t \leq T_{1} \\
+f_{2}(t) \doteq \sum_{i=0}^{N} p_{2, i} t^{i} & T_{1} \leq t \leq T_{2} \\
+\vdots & \vdots \\
+f_{M}(t) \doteq \sum_{i=0}^{N} p_{M, i} t^{i} & T_{M-1} \leq t \leq T_{M}
+\end{array}\right.
 $$
-
-+ The functional integrates soft constraints (spatial, velocity, jerk, etc.)
-
-+ Additional hard constraints can be formulated (minimum turn radius, etc.)
-
-+ Solved using numerical optimization
-
-+ Often nonconvex problem $\to$  **converges slowly to local optimal or even not converge**
-
-Note: that's the reason why we need good hierarchy, namely, if we have better decision inputs to formulate the state space into sub-convex space, the problem can be numerically solved.
-
-
-
+<img src="/sikang3.png" width = "500">
 
 ---
-layout: two-cols
+layout: figure-side
+figureCaption: 
+figureFootnoteNumber: 1
+figureUrl: sikang5.png
 ---
 
-# Convex
-Convex cases can reach global minimum.
-<img src="/convex.png" width = "350">
+## Search-based Trajectory Planning
 
-::right::
 
-# Non Convex
++ Idea: 
+  + Discretize configuration space into graph
++ Global Optimality
 
-Nonconvex cases only fall into local minimum.
-<img src="/nonconvex.png" width = "350">
 
----
-layout: default
-hideInToc: yes
----
 
-## Graph Search Methods
-
-<img src="/lattice.png" width = "900">
-
-+ Idea: Discretize configuration space into graph
-
-+ Various algorithms for constructing graphs
-
-+ Search strategies:  Dijkstra, $A^{*}$, ... (like *route planning*)
+<img src="/lattice.png" width="500"   border=0 />
 
 
 ---
@@ -393,61 +386,12 @@ layout: default
 hideInToc: yes
 ---
 
-## Graph Search Methods： Examples
 
+## Search-based Trajectory Planning
 
-<html>
-<body>
-<table><tr>
-<td><img src="/Astar.gif" width="500"   border=0 /></td>
-<td><img src="/Dijkstra.gif" width="500"   border=0 /></td>
-</tr></table> 
-</body>
-</html>
-
----
-layout: default
-hideInToc: yes
----
-
-## Graph Search Methods： Examples
-
-<html>
-<body>
-<table><tr>
-<td><img src="/D_star.gif" width="500"   border=0 /></td>
-<td><img src="/LPAstar.gif" width="500"   border=0 /></td>
-</tr></table> 
-</body>
-</html>
-
----
-layout: default
-hideInToc: yes
----
-
-## Incremental Search Techniques
-
-
-
-+ Idea: Incrementally build increasingly finer discretization of configuration space
-
-+ Guaranteed to provide feasible path given enough computation time
-
-+ But: computation time can be unbounded
-
-+ Prominent example: Rapidly exploring random trees (RRTs)
-
-Note: Not complete and usually suitable for vehicle motion planning.
-
-<html>
-<body>
-<table><tr>
-<td><img src="/RRT_2D.gif" width="250"   border=0 /></td>
-<td><img src="/RRT_STAR2_2D.gif" width="250"   border=0 /></td>
-</tr></table> 
-</body>
-</html>
++ Motionprimitives:
+  + Existing work: sampling in state space
+<img src="/lat_traj.png" width="600"   border=0 />
 
 
 ---
@@ -497,6 +441,39 @@ hideInToc: true
 
 # 量产 L2+ 中的决策规划算法实践
 ## 以高速领航辅助驾驶(NOP)为例
+---
+layout: default
+---
+
+# Motion planning in L2+ 
+
+**How to evaluate motion planner**
+
++ Feasibilty: whether the planning results are executable or not for AVs
++ Safety: whether the planning results are collision-free or not
++ Optimality: whether the planning result is optimal or sub-optimal
++ Completeness: if there exists a solution, whether the planner is able to find it
++ Run time: how much time it takes to find the planning result
+
+
+---
+layout: default
+---
+
+# L2+ 决策规划场景：量产自动驾驶功能
+
++ 智能行车辅助：
+  + 近距离加塞应对（Close Cut-in Handling）
+  + 智能避障（Intelligent Collision Avoidance）
+  + 拨杆变道（Driver Triggered Lane Changing）
++ 领航高速驾驶：
+  + ⾼级超⻋辅助（Advanced Overtaking Assistant）
+  + ⾃动上下匝道（Ramp to Ramp）
+  + 智能调速（Intelligent Speed Limit）
+
++ 领航城区驾驶：
+  + 路⼝处理（Intersection Handing）
+  + 绕⾏避障（By Pass Driving）
 
 
 
@@ -574,6 +551,16 @@ hideInToc: true
 车道决策与障碍物决策共同为下游的轨迹规划提供可行空间。
 
 
+---
+layout: figure-side
+figureCaption: 给定导航路线、车道决策和障碍物决策，定量地规划一条从车辆当前位置指向目的地的轨迹
+figureFootnoteNumber: 
+figureUrl: avoid_fig_multi_case.png
+hideInToc: true
+---
+# 高速 NOP 中的决策
+
+
 
 ---
 layout: figure-side
@@ -645,7 +632,7 @@ $$
 ---
 layout: default
 ---
-# Minimum jerk trajectory generation
+# 最小化 jerk 轨迹生成
 
 **Why trajectory generation/optimization**
 
@@ -656,6 +643,168 @@ layout: default
 
 
 <img src="/traj_opt.png" width = "500">
+
+---
+layout: figure-side
+figureCaption: The front-end is kinodynamic feasible, why a back-end necessary? Path quality and time efficiency.
+figureFootnoteNumber: 1
+figureUrl: back_parking.png
+hideInToc: true
+---
+
+
+## 光滑轨迹跟踪：微分平坦
+
+**常用算法**
+
++ Boundary condition: start, goal positions (orientations)
++ Intermediate condition: waypoint positions (orientations)
+  + Waypoints can be found by path planning (A*, RRT*, etc)
++  Smoothness criteria
+  + Generally translates into minimizing rate of change of “input”
+
+---
+layout: figure-side
+figureCaption: 假设完成了轨迹优化，那么如何保证控制能准确实现优化的轨迹而不至于由于控制误差引发碰撞？ 
+figureFootnoteNumber: 1
+figureUrl: flatness_space.png
+hideInToc: true
+---
+
+
+## 光滑轨迹跟踪：微分平坦
+
+**微分平坦性的定义**
+
+对于非线性系统系统： $\dot{x} = f(x,u)$
+
+如果能存在下列形式的输出量：
+
+$z(t) = h(x,u,\dot{u},...,u^{i})$
+
+使得 $x,u$ 均可以表示为输出 $z$ 和其导数的函数，即
+
+$x(t) = x(z,\dot{z},...,z^{i})$
+
+$u(t) = u(z,\dot{z},...,z^{i})$
+
+则称系统对于输出 $z$ 是微分平坦的
+
+**如果一个非线性系统具有微分平坦性，则该非线性系统可控**
+
+
+---
+layout: figure-side
+figureCaption:  
+figureFootnoteNumber: 1
+figureUrl: bycycle.png
+hideInToc: true
+---
+
+
+## 微分平坦的车辆模型
+自行车模型的方程如下：
+$$
+\begin{array}{l}
+\dot{x}=v \cos \theta \\
+\dot{y}=v \sin \theta \\
+\dot{\theta}=v \tan \delta / L \\
+\dot{\delta}=\omega
+\end{array}
+$$
+选取 $(x,y)$ 为微分平坦变量可以得到
+
+$\theta=\operatorname{atan} 2(\dot{y}, \dot{x})$
+
+$\delta=\arctan \frac{(\ddot{y} \dot{x}-\ddot{x} \dot{y}) L}{\left(\dot{x}^{2}+\dot{y}^{2}\right)^{\frac{3}{2}}}$
+
+$\omega=\frac{(\ddot{y} \dot{x}-\ddot{x} \dot{y})\left(\dot{x}^{2}+\dot{y}^{2}\right)-3(\ddot{y} \dot{x}-\ddot{x} \ddot{y})(\dot{x} \ddot{x}+\dot{y} \ddot{y})}{\left(\dot{x}^{2}+\dot{y}^{2}\right)^{3}+L^{2}(\ddot{y} \dot{x}-\ddot{x} \dot{y})^{2}} \sqrt{\dot{x}^{2}+\dot{y}^{2} L}$
+
+**只要轨迹 $(x,y)$ 至少两阶微分存在**，则可以得到系统其他状态 $(v,w)$ 与控制输入 $(v,w)$，即系统可控
+
+
+---
+layout: figure-side
+figureCaption:   Minimum jerk -minimize angular velocity, good for visual tracking
+figureFootnoteNumber: 0
+figureUrl: mini_jerk.png
+hideInToc: true
+---
+## 光滑轨迹生成
+
+
+**多项式轨迹**
+
++ Easy determination of smoothness criterion with polynomial orders
++ Easy and closed form calculation of derivatives
++ Decoupled trajectory generation in three dimensions
+
+$$
+f(t)=\left\{\begin{array}{cc}
+f_{1}(t) \doteq \sum_{i=0}^{N} p_{1, i} t^{i} & T_{0} \leq t \leq T_{1} \\
+f_{2}(t) \doteq \sum_{i=0}^{N} p_{2, i} t^{i} & T_{1} \leq t \leq T_{2} \\
+\vdots & \vdots \\
+f_{M}(t) \doteq \sum_{i=0}^{N} p_{M, i} t^{i} & T_{M-1} \leq t \leq T_{M}
+\end{array}\right.
+$$
+
+---
+layout: figure-side
+figureCaption: 
+figureFootnoteNumber: 0
+figureUrl: jerk_crash.png
+hideInToc: true
+---
+## 解决碰撞：迭代方法
+
+**Smooth is enough?**
++ 初始轨迹无碰撞
++ 轨迹优化后产生碰撞
++ 通过（迭代地）添加中间碰撞点处的路径点来实现
+
+
+**Better solution?**
++ 迭代的点可能需要加很多次
++ 无法保证有限次的加点可以解决这个问题
++ 导致局部轨迹质量下降很快
+
+
+Recall: 决策模块的输出：时间上的位置限制
+
+**以决策的输出作为约束条件，最小化 jerk 为目标函数，构建一个优化问题**
+
+
+---
+layout: figure-side
+figureCaption: 可以较好的解决多种复杂约束情况下的轨迹生成问题
+figureFootnoteNumber: 0
+figureUrl:  QP.jpg
+hideInToc: true
+---
+## 基于优化的轨迹生成
+
+**考虑曲率和避障的轨迹优化**
+
+轨迹可以分为横纵向两个部分，分别表示为：
+$$
+\begin{array}{l}
+f_{i}(s)=a_{i 0}+a_{i 1}\left(s-s_{i}\right)+a_{i 2}\left(s-s_{i}\right)^{2}+a_{i 3}\left(s-s_{i}\right)^{3} \\
+g_{i}(s)=b_{i 0}+b_{i 1}\left(s-s_{i}\right)+b_{i 2}\left(s-s_{i}\right)^{2}+b_{i 3}\left(s-s_{i}\right)^{3}
+\end{array}
+$$
+
+一个可取的目标函数为：
+$$
+\min _{a_{i j}, b_{i j}} \sum_{i=0}^{N} w_{1}\left(\ddot{f}_{i}\left(s_{i}\right)^{2}+\ddot{g}_{i}\left(s_{i}\right)^{2}\right) 
+$$
+
+约束有：
+
++ 不能与障碍物发生碰撞
++ 曲率连续(控制需求)
++ 连续性条件(各段轨迹需要导数连续)
+
+
 
 
 
@@ -669,3 +818,142 @@ hideInToc: true
 
 # 量产自动驾驶中的决策规划挑战
 ## 基于城区领航辅助驾驶(City-NOP)分析
+
+---
+layout: default
+---
+
+## City-NOP：Difficulties
+
++ Interaction
+
++ Uncertainty
+  + with motion uncertatinty
+  + with limited field-of-view(occulsion..)
+  + with percetion uncertatinty
+
+---
+layout: default
+---
+
+## Uncertatinty: motion uncertatinty
+
++ Motivations:
+  + High control authority is impractical
+  + Real-world env factors: rain, snow, terrain and etc.
+
+<img src="/sikang6.png" width = "700">
+
+
+---
+layout: default
+---
+
+## Uncertatinty: motion uncertatinty
+
++ Motivations:
+  + Over-inflating obstacles is not a complete solution
+
+
+<img src="/sikang7.png" width = "800">
+
+
+---
+layout: default
+---
+
+## Uncertatinty: motion uncertatinty
+
++ Related work:
+  + Reachability analysis
+<img src="/sikang8.png" width = "700">
+
+Drawbacks:
+1. Computationally expensive
+2. Too conservative
+
+---
+layout: default
+---
+
+## Uncertatinty: limited FOV
+
++ Challenges in real world navigation:
+  + Map is unknown/not-fully reliable
+  + Sensor has limited FOV
+  + Occulsion usually exists in urban
+
+<img src="/occluded.png" width = "700">
+
+---
+layout: default
+---
+## Uncertatinty: perception
+
+**Decision density**
+
+<img src="/cruse1.png" width = "700">
+
+---
+layout: default
+---
+
+## Method: Learning-based Decision
+
+**Prediction-coupled behavior planning**
+
++ Embed the history states of agents and scene context into high-dimensional spaces, encode the interactions between agents and the scene context using Transformer modules.
++ Employ a learned optimizer as a motion planner to explicitly plan a future behavior for the AV according to the most-likely prediction result and initial motion plan.
+
+<img src="/decision_dp.png" width = "650">
+
+
+---
+layout: default
+---
+
+## Method: Learning-based Decision
+
+add more
+
+---
+layout: default
+---
+
+## Method: Occupancy-based Planning
+
+**A low-cost urban solution**
++ From **Free Space** to **Occupancy map**
++ Occupancy Grid/Flow/Occusion
++ Not object-based, suitable for motion planning
+
+<img src="/occupancy_network.png" width = "700">
+
+---
+layout: figure-side
+figureCaption: 
+figureFootnoteNumber: 0
+figureUrl:  occupancy.png
+hideInToc: true
+---
+
+## Occupancy-based Planning
+
+**Features**
+
++ 3D representation
++ General object detection
++ long-tail case(not in trainning set)
++ easy to use in prediction/planning pipeline
++ uncertatinty prediction(probality)
++ dynamic features
+
+**Occupancy map based Planning method**
+
++ A*
++ State Lattice
++ RRT
++ nearly all planning methods, actually ...
+
+
+
