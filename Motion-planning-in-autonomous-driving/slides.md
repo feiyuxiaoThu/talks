@@ -560,6 +560,18 @@ hideInToc: true
 ---
 # 高速 NOP 中的决策
 
+**以静态障碍物决策为例**
+
++ 获取 Frenet 坐标下的障碍物坐标
++ 遍历障碍物进行决策
+  + 如果障碍物不是静态，跳过
+  + 如果障碍物挡住了路径，产生 stop 决策
+  + 如果障碍物不在路径上，跳过
++ Nudege 判断
+  + 如果距离静态障碍物太远，则忽略
+  + 如果静态障碍物距离车道中心很近，则执行 stop 决策
+  + 如果障碍物在车道边缘，则执行 Nudge
+
 
 
 ---
@@ -628,6 +640,23 @@ $$
 + 碰撞检测
 + 轨迹评估
 
+---
+layout: default
+---
+# Recall: what is motion planning
+
++ **Basic requirements**
+  + Safety: collision avoidance
+  + Smoothness: energy saving, comfort
+  + Kinodynamic feasibility: executable, controllable
++ **Front-end path finding** (Behavior Planning + Coarse Path Generation)
+  + Search for an initial safe path
+  + Low dimensional
+  + Discrete space
++ **Back-end trajectory generation** (Trajectory Optimization)
+  + Search for an executable trajectory
+  + High dimensional
+  + Continuous space
 
 ---
 layout: default
@@ -826,11 +855,49 @@ layout: default
 ## City-NOP：Difficulties
 
 + Interaction
+  + human-machine interaction
+  + with other agents
 
 + Uncertainty
   + with motion uncertatinty
   + with limited field-of-view(occulsion..)
   + with percetion uncertatinty
+
+
+---
+layout: figure-side
+figureCaption: 人机共驾，在纵向提速的同时横向居中
+figureFootnoteNumber: 0
+figureUrl:  over.png
+hideInToc: true
+---
+## Override
+
+<img src="/hmi.png" width = "700">
+
+
++ Human-Machine co-drive
++ Interection
++ Ensure safety
++ Responsibility
+
+---
+layout: figure-side
+figureCaption: Multi-vehicle interaction at intersections
+figureFootnoteNumber: 0
+figureUrl:  inter2.png
+hideInToc: true
+---
+## Intereaction other agents
+
+
+<img src="/inter1.png" width = "700">
+
++ How to **semantically understand** the interection process in dense scenario?
++ What are the underlying **interaction pattern/rules** that guide such a complex dynamic system?
+
+
+
 
 ---
 layout: default
@@ -894,11 +961,32 @@ layout: default
 
 <img src="/cruse1.png" width = "700">
 
+
+---
+layout: figure-side
+figureCaption: Semantic environment in which the vehicles are represented in a graph. The vehicles are nodes and are connected to each other with edges. Graph neural networks take graphs directly as input
+figureFootnoteNumber: 0
+figureUrl:  inter3.png
+hideInToc: true
+---
+
+## Learning-based Decision
+
+
+
+<img src="/GNN.png" width = "800">
+
+
++ Represents vehicles with the nodes containing state information and the edges containing the distance.
+
++ This makes it possible for using transformers when tackling situations with varying numbers of other agents. 
+
+
 ---
 layout: default
 ---
 
-## Method: Learning-based Decision
+## Learning-based Decision
 
 **Prediction-coupled behavior planning**
 
@@ -908,13 +996,6 @@ layout: default
 <img src="/decision_dp.png" width = "650">
 
 
----
-layout: default
----
-
-## Method: Learning-based Decision
-
-add more
 
 ---
 layout: default
